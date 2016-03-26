@@ -513,6 +513,8 @@ def displayWords(words, sortem = False, popularity = False, uniq = False, doAuto
     if makeMovie : 
         lockCamExposure(cam)
         setEffex(0,0)
+        if len(words['wordList']) > 100 :
+            words['wordList'] = words['wordList'][:frameLimit]
     if sortem :
         if uniq :
             displayList(sorted(set(words['wordList'])),0.3,True, doAutoScroll)
