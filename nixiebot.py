@@ -115,7 +115,7 @@ wordQIdx = 0 #usd to keep wordq items sortable
 rollq = queue.Queue()
 recentTweetDeque = collections.deque('a',1000)  #random feed seems to be about five a second
 recentTweetDeque.clear()
-
+recentIDDeque = collections.deque('a',100) #deduplication deque to spot incoming duplicates from twitter
 recentReqs = []
 reqPickleFrequency = 100 #how many requests to hold in RAM before writing out to disc
 
@@ -126,11 +126,16 @@ qAtZero = False #flag used to determine whether to update twitter profile
 
 class filterStreamer(TwythonStreamer):
     backOffTime = 60
-
+    
     def on_success(self, tweet):
+        global recentIDDeque
         if 'text' in tweet and not ('retweeted_status' in tweet) :
-            print("<<<<<<<<<<<<<<<<<<<  Incoming!<<<<<<<<<<<<<<<<<< " + html.parser.HTMLParser().unescape(tweet['text']))
-            processIncomingTweet(tweet)
+            print("<<<<<<<<<<<<<<<<<<<  Incoming!<<<<<<<<<<<<<<<<<< " + html.parser.HTMLParser().unescape(tweet['text']) + tweet['id_str'])
+            if tweet['id_str'] not in recentIDDeque :
+                 processIncomingTweet(tweet)
+                 recentIDDeque.appendleft(tweet['id_str'])
+            else :
+                print("!!!! duplicate!  Ignored ")
             backOffTime = 60
 
     def on_error(self, status_code, data):
@@ -268,6 +273,7 @@ def runClock():  #TODO ... use queue get with timeout and try catch as I think i
     global makeMovie
     global timeThen
     global profileUpdateCounter
+    global clockPause
     print("**************clock thread starting ")
     print("GPIO init")
     initGPIO()
@@ -392,7 +398,7 @@ def tweetOutWord() :
                 response = twitter.upload_media(media=pic, additional_owners=addOwners ) 
                 twitter.update_status( status=picStatus, 
                      media_ids=[response['media_id']], 
-                     in_reply_to_status_id=tweet['id'])
+                     in_reply_to_status_id=tweet['id_str'])
                # print("rate limit remaining= ", twitter.get_lastfunction_header('x-rate-limit-remaining'))
                # print("rate limit reset= ", twitter.get_lastfunction_header('x-rate-limit-reset'))     
             except BaseException as e:
@@ -493,7 +499,7 @@ def tweetMovie(fileName, tweet, tag) :
             response = twitter.upload_media(media=pic, additional_owners=addOwners, possibly_sensitive = sensitive )  
             twitter.update_status( status=picStatus, 
                  media_ids=[response['media_id']], 
-                 in_reply_to_status_id=tweet['id'])
+                 in_reply_to_status_id=tweet['id_str'])
         except BaseException as e:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Tweeting movie exception!" + str(e))
             print(" status text =", picStatus)
@@ -559,7 +565,7 @@ def makeGif(name,delay=20) :
             os.remove(killit) #get rid of the frame files now they're wrapped up
     frameCount=0
 
-def takeFrame() :
+def takeFrame(resize = True) :
     global cam
     global frameCount
     if frameCount < 10 :
@@ -570,8 +576,11 @@ def takeFrame() :
         frameStr = str(frameCount)
     if frameCount % 10 == 0 :
         print("capturing frame:", frameCount)
-    if frameCount <= frameLimit :    
+    if frameCount <= frameLimit and resize:    
         cam.capture('tweetMov'+frameStr+'.jpg',resize=(320,200))
+        frameCount += 1
+    elif not resize :
+        cam.capture('tweetMov'+frameStr+'.jpg')
         frameCount += 1
     else : print("hit frame limit")
 
@@ -816,7 +825,7 @@ def proper(strng,subst):
     return(newstring)
 
 
-def displayString(strng):
+def displayString(strng, resize = True):
     global comLock
     #print("displaystring wait comlock")
     with comLock :
@@ -825,11 +834,11 @@ def displayString(strng):
             print("displaying: "+ strng)
         com.write(bytes("$B7M"+strng+"\r","utf-8"))
         if makeMovie:
-            takeFrame()
+            takeFrame(resize)
     #print("displaystring rel comlock")        
     return
 
-def scrollString(strng, offset = 0):
+def scrollString(strng, offset = 0, resize = True):
     global tubes
     global scrollInterval
     stashfx = effx
@@ -839,15 +848,15 @@ def scrollString(strng, offset = 0):
     #scroll in from the right
     for startTube in range(tubes - offset,0,-1):
         #print("StartTube=" + str(startTube))
-        displayString((" " * startTube) + ( strng[0:tubes-startTube].ljust(tubes) ) )
+        displayString((" " * startTube) + ( strng[0:tubes-startTube].ljust(tubes) ), resize = resize )
         #print((" " * startTube) + ( strng[0:tubes-startTube].ljust(tubes) ))
         if not makeMovie : time.sleep(scrollInterval)    
     #then scroll out off the left    
     for startChar in range(0,len(strng)):
-        displayString(strng[startChar:startChar+tubes].ljust(tubes))
+        displayString(strng[startChar:startChar+tubes].ljust(tubes), resize = resize)
         #print(strng[startChar:startChar+tubes].ljust(tubes))
         if not makeMovie: time.sleep(scrollInterval)
-    displayString(" ".ljust(tubes))
+    displayString(" ".ljust(tubes), resize = resize)
     if not makeMovie : time.sleep(scrollInterval)
     setEffex(stashfx,stashspeed)
     
@@ -1064,7 +1073,21 @@ def loadTextFortunes() :
             fortunes[listName] = f.readlines()
             print( fortunes[listName])
     
-    
+
+def picNoTweet(txt, name="noTweet") : #take a highest resolution possible pic or movie and don't tweet it out, file to be transported by other means
+    global makeMovie
+    with comLock : #wait for display to become ready after latest clock loop has finished with it
+        if len(txt) > tubes:
+            makeMovie = True
+            scrollString(proper(txt," "), resize=False)
+            makeGif(name)
+            makeMovie=False
+        else :    
+            displayString(proper(txt," ").ljust(tubes))
+            time.sleep(1.5)
+            cam.capture(name+'.jpg')
+            
+        
 loadTextFortunes()  #read in *.ftnline by line and put into list in fortunes{} directory    
 running=True
 # retrieve saved queue if file is present here, remember to delete file after!
@@ -1115,6 +1138,7 @@ try:
             print("U to toggle use of user fonts, currently: " + bStr(userFont))
             print("D to toggle Dummy run mode, no tweets are sent in dummy run mode, currently: " + bStr(dummyRun))
             print("I to inject a test tweet for immediate display")
+            print("G to Go take a picture of a supplied string ... not tweeted, high resolution used. ")
             print("Q to quit nicely, disconnecting twitter streams behind you (if rate limit sleep is in progress it is not interrupted)")
             print("H to display this message")
             
@@ -1164,13 +1188,16 @@ try:
             if not blanked : lightTubes() 
             else : blankTubes()    
         if key.upper() =="F" :
-            fileName = input("please enter the font filename")
+            fileName = input("please enter the font filename ")
             loadUserFont(fileName)
         if key.upper() =="U" :
             toggleUserFont()
             print("user font = " + bStr(userFont))
         if key.upper() == "I" :  #test tweet injection
-            print("not implimented yet")
+            print("not implimented yet ")
+        if key.upper() == "G" :
+            picWord = input("please enter the text to be displayed, it'll be stored as noTweet.jpg ")
+            picNoTweet(picWord)
         if key == "Q" or key == "q" :
             running = False
             print("joining runclock until it terminates")

@@ -11,4 +11,8 @@ Unless you want your bot getting traffic from this one you should change all ref
 Maybe change the greetings and scolds in makeStatusText to change the personality a bit too.
 Command reference is at http://nixiebot.tumblr.com/ref
 
- 
+Nixiebotreader.py is a severely cut down version for collecting tweets and stashing them for later display while work is being done on the hardware, this might be a good startign point for those who want to do without all the hardware.
+
+The user font file (ufont.txt) is an export from a character set drawn using this online character designer http://b7971.lucsmall.com/
+be sure to select the "reverse order" button at the top of the page for smartsocket compatability.
+
