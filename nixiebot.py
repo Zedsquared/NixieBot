@@ -446,7 +446,7 @@ def updateQlength() : #sets the description parameter in twitter profile so that
     desc = "dummy"*50  #start with a big string so loop executes at least once!
     while len(desc) > 159 :
         baseDesc= "I'm a twitterised, neon display, clock. Tweet with #NixieBotShowMe and a word, full guide on tumblr. "
-        hints = ["","100 character limit on movies.", "Try #twitNice .", "Phrases:need:separators.", "No need to @mention me.", "Twitter will munge URLs.", "Ask an #eightBall question.", "Be patient with long queues.", "Remember, tweets are not anonymous!","Try #twitSwears.","Try #oblique.", "Use #scroll on short words for a gif"]
+        hints = ["","100 character limit on movies.", "Try #twitNice .", "Phrases:need:separators.", "No need to @ mention me.", "Twitter will munge URLs.", "Ask an #eightBall question.", "Be patient with long queues.", "Remember, tweets are not anonymous!","Try #twitSwears.","Try #oblique.", "Use #scroll on short words for a gif"]
         desc = baseDesc+random.choice(hints)
         if qLen > 0 :
             desc = desc + " Queue at: "+ str(wordq.qsize()) + " to go."
@@ -642,7 +642,7 @@ def makeStatusText(tweet,aWord):
         #print("############ processing mentions ")
         if len(tweet['entities']['user_mentions'])== 1 : 
             if tweet['entities']['user_mentions'][0]['screen_name'].lower() == "nixiebot" : # educate people @mentioning me
-                edString = "BTW: No need to @mention me, just use the tag"
+                edString = "BTW: No need to @ mention me, just use the tag"
                 if len(picStatus) + len(edString) <  90  : picStatus = picStatus + edString
         
         picStatus = picStatus + " Hey:"
