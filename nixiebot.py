@@ -347,6 +347,7 @@ def tweetOutWord() :
     timeThen=time.time()
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Tweeting!>>>>>>>",html.parser.HTMLParser().unescape(tweet['text'])," Queue= " + str(wordq.qsize()))
     tt=False   #tt used as simple "has a special hashtag been processed" flag
+    setCamEffex(cam, tweet)
     for ht in tweet['entities']['hashtags']:
         if ht['text'].lower() =="thetime" and not tt:
             displayTime()
@@ -374,7 +375,7 @@ def tweetOutWord() :
             displayWords({'wordList':fortuneAsList},delay=40)
             tt = True
             tweetMovie("movie.gif",tweet,ht['text'])   
-    if not tt:   
+    if not tt: #tt flag gets set if any action other than "display a word that has been submitted "  has happened already
         theWord=extractWord(html.parser.HTMLParser().unescape(tweet['text']))
         if len(theWord) > tubes or scanTags(tweet,"scroll"):
             makeMovie = True
@@ -413,6 +414,7 @@ def tweetOutWord() :
         else :
             print("Dummy run, not tweeting")
     #flashWord(theWord,10)
+    cam.image_effect="none"
     wordq.task_done()
     
     if blanked : blankTubes()
@@ -597,8 +599,14 @@ def lockCamExposure(camra) :
 def unlockCamExposure(camra) :
     camra.exposure_mode='auto'
     camra.awb_mode = 'auto'
+    camra.iso = 0
     
-    
+def setCamEffex(camra,tweet) :
+    #check to see if any camera effect tags are in message and apply them if so (only one effect at a time so last one encountered wins)
+    for ht in tweet['entities']['hashtags'] :
+        if ht['text'].lower() in camra.IMAGE_EFFECTS :
+            camra.image_effect = ht['text'].lower()
+            
 def makeStatusText(tweet,aWord):
     salutes=("Your wish is my command","Thanks for the suggestion","Hello","Hi",
              "Wotcha","Greetings","Thanks","","","","Thanks for the tweet","Eh-up","Wotcher",
@@ -1086,8 +1094,31 @@ def picNoTweet(txt, name="noTweet") : #take a highest resolution possible pic or
             displayString(proper(txt," ").ljust(tubes))
             time.sleep(1.5)
             cam.capture(name+'.jpg')
+
+def cameraSettings() :
+    global cam
+    global camset 
+    cp = "Camera> "
+    camMode = True
+    while camMode :
+        key = input(cp + "Enter command, H lists camera commands")
+        if key.upper() == "H" :
+            print ("A toset Auto White Balance mode, currently at : " + str(cam.awb_mode))
+            print(" B to set brightness, currently at: " + str(cam.brightness))
+            print(" C to set contrast,currently at: " + str(cam.contrast))
+            print(" E to set effects, currently at: " + str(cam.image_effect))
+            print(" X to set exposure, ")
+            print(" T to Take test image ")
+            print(" Q to quit back to main mode ")
+        elif key.upper() == "E" :
+            print(" Available image effects are:"+str(cam.IMAGE_EFFECTS))
+        elif key.upper() =="Q" :
+            camMode = False
             
         
+
+
+    
 loadTextFortunes()  #read in *.ftnline by line and put into list in fortunes{} directory    
 running=True
 # retrieve saved queue if file is present here, remember to delete file after!
@@ -1139,6 +1170,7 @@ try:
             print("D to toggle Dummy run mode, no tweets are sent in dummy run mode, currently: " + bStr(dummyRun))
             print("I to inject a test tweet for immediate display")
             print("G to Go take a picture of a supplied string ... not tweeted, high resolution used. ")
+            print("E to enter Exposure test mode (for capturing and setting camera parameters")
             print("Q to quit nicely, disconnecting twitter streams behind you (if rate limit sleep is in progress it is not interrupted)")
             print("H to display this message")
             
@@ -1198,6 +1230,8 @@ try:
         if key.upper() == "G" :
             picWord = input("please enter the text to be displayed, it'll be stored as noTweet.jpg ")
             picNoTweet(picWord)
+        if key.upper() =="E" :
+            cameraSettings()
         if key == "Q" or key == "q" :
             running = False
             print("joining runclock until it terminates")

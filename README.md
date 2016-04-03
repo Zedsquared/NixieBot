@@ -1,6 +1,6 @@
 # NixieBot
 Twitter Bot that drives smartsocket based alphanumeric neon tube display, hosted on Raspberry Pi.
-Dependencies: Twython for Twitter comms, GrafixMagick for the gif making, Picam and GPIO libraries.
+Dependencies: Twython for Twitter comms, GrafixMagick for the gif making, Picamera and GPIO libraries.
 
 Initial upload ... it's a bit nasty with far too many global vars etc, it just grew that way, refactor is on the cards :)
 
