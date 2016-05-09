@@ -87,13 +87,17 @@ HVToggleTime = 0
 scrollInterval = 0.15
 userProperChars = ""
 cam=None
+glitchType = "none"
+glitchLevel = 0
 
-
+botState={'lastDM':0,'lastDMCheckTime':time.time(),'DMdq':collections.deque()}
 
 badwords=["4r5e", "5h1t", "5hit", "a55", "anal", "anus", "ar5e", "arrse", "arse", "ass", "ass-fucker", "asses", "assfucker", "assfukka", "asshole", "assholes", "asswhole", "a_s_s", "b!tch", "b00bs", "b17ch", "b1tch", "ballbag", "balls", "ballsack", "bastard", "beastial", "beastiality", "bellend", "bestial", "bestiality", "bi+ch", "biatch", "bitch", "bitcher", "bitchers", "bitches", "bitchin", "bitching", "bloody", "blow job", "blowjob", "blowjobs", "boiolas", "bollock", "bollok", "boner", "boob", "boobs", "booobs", "boooobs", "booooobs", "booooooobs", "breasts", "buceta", "bugger", "bum", "bunny fucker", "butt", "butthole", "buttmuch", "buttplug", "c0ck", "c0cksucker", "carpet muncher", "cawk", "chink", "cipa", "cl1t", "clit", "clitoris", "clits", "cnut", "cock", "cock-sucker", "cockface", "cockhead", "cockmunch", "cockmuncher", "cocks", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocksucks", "cocksuka", "cocksukka", "cok", "cokmuncher", "coksucka", "coon", "cox", "crap", "cum", "cummer", "cumming", "cums", "cumshot", "cunilingus", "cunillingus", "cunnilingus", "cunt", "cuntlick", "cuntlicker", "cuntlicking", "cunts", "cyalis", "cyberfuc", "cyberfuck", "cyberfucked", "cyberfucker", "cyberfuckers", "cyberfucking", "d1ck", "damn", "dick", "dickhead", "dildo", "dildos", "dink", "dinks", "dirsa", "dlck", "dog-fucker", "doggin", "dogging", "donkeyribber", "doosh", "duche", "dyke", "ejaculate", "ejaculated", "ejaculates", "ejaculating", "ejaculatings", "ejaculation", "ejakulate", "f u c k", "f u c k e r", "f4nny", "fag", "fagging", "faggitt", "faggot", "faggs", "fagot", "fagots", "fags", "fanny", "fannyflaps", "fannyfucker", "fanyy", "fatass", "fcuk", "fcuker", "fcuking", "feck", "fecker", "felching", "fellate", "fellatio", "fingerfuck", "fingerfucked", "fingerfucker", "fingerfuckers", "fingerfucking", "fingerfucks", "fistfuck", "fistfucked", "fistfucker", "fistfuckers", "fistfucking", "fistfuckings", "fistfucks", "flange", "fook", "fooker", "fuck", "fucka", "fucked", "fucker", "fuckers", "fuckhead", "fuckheads", "fuckin", "fucking", "fuckings", "fuckingshitmotherfucker", "fuckme", "fucks", "fuckwhit", "fuckwit", "fudge packer", "fudgepacker", "fuk", "fuker", "fukker", "fukkin", "fuks", "fukwhit", "fukwit", "fux", "fux0r", "f_u_c_k", "gangbang", "gangbanged", "gangbangs", "gaylord", "gaysex", "goatse", "god-dam", "god-damned", "goddamn", "goddamned", "hardcoresex", "hell", "heshe", "hoar", "hoare", "hoer", "homo", "hore", "horniest", "horny", "hotsex", "jack-off", "jackoff", "jap", "jerk-off", "jism", "jiz", "jizm", "jizz", "kawk", "knob", "knobead", "knobed", "knobend", "knobhead", "knobjocky", "knobjokey", "kock", "kondum", "kondums", "kum", "kummer", "kumming", "kums", "kunilingus", "l3i+ch", "l3itch", "labia", "lmfao", "lust", "lusting", "m0f0", "m0fo", "m45terbate", "ma5terb8", "ma5terbate", "masochist", "master-bate", "masterb8", "masterbat*", "masterbat3", "masterbate", "masterbation", "masterbations", "masturbate", "mo-fo", "mof0", "mofo", "mothafuck", "mothafucka", "mothafuckas", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckers", "mothafuckin", "mothafucking", "mothafuckings", "mothafucks", "mother fucker", "motherfuck", "motherfucked", "motherfucker", "motherfuckers", "motherfuckin", "motherfucking", "motherfuckings", "motherfuckka", "motherfucks", "muff", "mutha", "muthafecker", "muthafuckker", "muther", "mutherfucker", "n1gger", "nazi", "nigg3r","nigger", "niggers", "nob", "nob jokey", "nobhead", "nobjocky", "nobjokey", "numbnuts", "nutsack", "orgasim", "orgasims", "orgasm", "orgasms", "p0rn", "pawn", "pecker", "penis", "penisfucker", "phonesex", "phuck", "phuk", "phuked", "phuking", "phukked", "phukking", "phuks", "phuq", "pigfucker", "pimpis", "piss", "pissed", "pisser", "pissers", "pisses", "pissflaps", "pissin", "pissing", "pissoff", "poop", "porn", "porno", "pornography", "pornos", "prick", "pricks", "pron", "pube", "pusse", "pussi", "pussies", "pussy", "pussys", "rectum", "retard", "rimjaw", "rimming", "s hit", "s.o.b.", "sadist", "schlong", "screwing", "scroat", "scrote", "scrotum", "semen", "sex", "sh!+", "sh!t", "sh1t", "shag", "shagger", "shaggin", "shagging", "shemale", "shi+", "shit", "shitdick", "shite", "shited", "shitey", "shitfuck", "shitfull", "shithead", "shiting", "shitings", "shits", "shitted", "shitter", "shitters", "shitting", "shittings", "shitty", "skank", "slut", "sluts", "smegma", "smut", "snatch", "son-of-a-bitch", "spac", "spunk", "s_h_i_t", "t1tt1e5", "t1tties", "teets", "teez", "testical", "testicle", "tit", "titfuck", "tits", "titt", "tittie5", "tittiefucker", "titties", "tittyfuck", "tittywank", "titwank", "tosser", "turd", "tw4t", "twat", "twathead", "twatty", "twunt", "twunter", "v14gra", "v1gra", "vagina", "viagra", "vulva", "w00se", "wang", "wank", "wanker", "wanky", "whoar", "whore", "willies", "willy", "xrated", "xxx"]
 nicewords=["love","luv","excellent","happy","joy","joyous","fantastic","superb","great","wonderful","nice","respect","respectful","anticipating","lovely","friendly","friend","best","cheers","thanks","glad","satisfied","satisfying","splendid","kind","welcome","welcoming","charming","delicious","pleasant","polite","tender","affable","sympathy","empathy","empathetic","sympathetic","peaceful","fond","good","cake","pie","kitten","kittens","swell","grand","peace","unity","amity","justice","truce","esteem"]
 validTags=["twitnice","twitswears","twitall","thetime"] #list of tags that can substitute for an actual word
-twitter = Twython(botkeys.APP_KEY,botkeys.APP_SECRET,botkeys.USER_KEY,botkeys.USER_SECRET)
+#validTags=[] #temporary measure
+client_args = {'timeout': 90 }
+twitter = Twython(botkeys.APP_KEY,botkeys.APP_SECRET,botkeys.USER_KEY,botkeys.USER_SECRET, client_args=client_args)
 
 priorityUsers=["Zedsquared", "NixtestTest"]  #tweets from these users get high priority (for jumping the queue when testing)
 
@@ -105,10 +109,10 @@ priorityUsers=["Zedsquared", "NixtestTest"]  #tweets from these users get high p
 #                    }
                     
 userCounter = collections.Counter()
-minInterval=38  #seconds per tweet minimum 
+minInterval=46  #seconds per tweet minimum (2400 per day allowed)
 frameLimit = 100
-wordq = queue.PriorityQueue() #Stores incoming command tweets,priority allows quicker live testing
-randq=queue.Queue(20) #just a little buffer 
+wordq = queue.PriorityQueue() #Stores incoming command tweets, priority allows quicker live testing
+randq=queue.Queue(100) #just a little buffer 
 consoleQ =  queue.Queue()  # for direct injection messages
 maxWordQ = 0 
 wordQIdx = 0 #usd to keep wordq items sortable
@@ -139,12 +143,17 @@ class filterStreamer(TwythonStreamer):
             backOffTime = 60
 
     def on_error(self, status_code, data):
+        global running
         print("************************************error from filter stream!  ")
         print (status_code)
         if (status_code == 420) :
             print("***************** filter is rate limited!" )
             print("*****************sleeping for" + str(self.backOffTime) )
-            time.sleep(self.backOffTime)
+            for i in range (1,int(self.backOffTime / 10)) :
+                if running :
+                    time.sleep(10)
+                else :
+                    break
             if self.backOffTime < 1200 :
                 self.backOffTime = self.backOffTime * 2
         # Want to stop trying to get data because of the error?
@@ -180,14 +189,19 @@ class randomStreamer(TwythonStreamer):
             backOffTime = 60
 
     def on_error(self, status_code, data):
+        global running
         print("************************************error from random stream!  ")
         print (status_code)
         if (status_code == 420) :
             print("!!!!!!!!!!!!!!!!!!!! random is rate limited!" )
             print("!!!!!!!!!!!!!!!!!!!! sleeping for" +  str(self.backOffTime) )
-            time.sleep(self.backOffTime)
-            if self.backOffTime < 1200 :
-                self.backOffTime = self.backOffTime * 2
+            for i in range (1,int(self.backOffTime / 10)) :
+                if running :
+                    time.sleep(10)
+                else :
+                    break
+            if self.backOffTime <= 7200 :
+                self.backOffTime = self.backOffTime * 2    
         # Want to stop trying to get data because of the error?
         # Uncomment the next line!
         #self.disconnect()  
@@ -287,7 +301,8 @@ def runClock():  #TODO ... use queue get with timeout and try catch as I think i
     with picamera.PiCamera() as cam:
         initcam(cam)
         while running:
-            if ((time.time() - timeThen) > minInterval) : #brain dead rate limit algo, should really examine returned headers in case of limit
+            makeMovie = False
+            if ((time.time() - timeThen) > minInterval) : 
                 if not wordq.empty() :
                     tweetOutWord()
                     profileUpdateCounter +=1
@@ -333,14 +348,17 @@ def runClock():  #TODO ... use queue get with timeout and try catch as I think i
                         scrollList(tweet['text'].split())
                         
                     randq.task_done()
+                    doDMs()
         # we get here if running is false i.e. quit command received
         cam.close()
         print("runclcok closing")
         return
 
-def tweetOutWord() :
+def tweetOutWord() : #main function for processing a tweet that has a command in it
     global makeMovie
     global timeThen
+    global glitchLevel
+    global glitchType
     lightTubes()
     nextOne=wordq.get()
     tweet = nextOne[2]
@@ -348,6 +366,9 @@ def tweetOutWord() :
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Tweeting!>>>>>>>",html.parser.HTMLParser().unescape(tweet['text'])," Queue= " + str(wordq.qsize()))
     tt=False   #tt used as simple "has a special hashtag been processed" flag
     setCamEffex(cam, tweet)
+    oldGlitchLevel = glitchLevel
+    oldGlitchType = glitchType
+    setGlitch(tweet)
     for ht in tweet['entities']['hashtags']:
         if ht['text'].lower() =="thetime" and not tt:
             displayTime()
@@ -374,51 +395,91 @@ def tweetOutWord() :
             print("picked fortune ; ", fortuneAsList)
             displayWords({'wordList':fortuneAsList},delay=40)
             tt = True
+            makeMovie = False
             tweetMovie("movie.gif",tweet,ht['text'])   
     if not tt: #tt flag gets set if any action other than "display a word that has been submitted "  has happened already
         theWord=extractWord(html.parser.HTMLParser().unescape(tweet['text']))
+        picStatus=makeStatusText(tweet, theWord) 
         if len(theWord) > tubes or scanTags(tweet,"scroll"):
+            print("movie")
+            lockCamExposure(cam)
             makeMovie = True
             scrollString(proper(theWord," "))
             makeGif("tweetWord")
             mediaName = 'tweetWord.gif'
             makeMovie=False
-        else :    
+        else :
+            print("single shot, makeMovie = ", makeMovie)
             displayString(proper(theWord," ").ljust(tubes))
             time.sleep(1.5)
             cam.capture('tweet.jpg',resize=(800,480))
             mediaName = 'tweet.jpg'
         pic=open(mediaName,'rb')
-        picStatus=makeStatusText(tweet, theWord) 
         addOwners=str(tweet['user']['id'])
         for m in tweet['entities']['user_mentions'] : #add all mentions as media owners so they can pass it on
             userID=m['id_str']
             addOwners = addOwners + "," + userID
         if not dummyRun :
             try:
+                print(">>>>>>>>>>>>> Uploading media ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
                 response = twitter.upload_media(media=pic, additional_owners=addOwners ) 
+                print(">>>>>>>>>>>>> Updating status  ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
                 twitter.update_status( status=picStatus, 
                      media_ids=[response['media_id']], 
                      in_reply_to_status_id=tweet['id_str'])
-               # print("rate limit remaining= ", twitter.get_lastfunction_header('x-rate-limit-remaining'))
-               # print("rate limit reset= ", twitter.get_lastfunction_header('x-rate-limit-reset'))     
+                print(">>>>>>>>>>>>> Done  ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
             except BaseException as e:
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Tweeting exception!" + str(e))
                 print(" status text =", picStatus)
                 if not 'retries' in tweet :
                     tweet['retries'] = 0
-                    wordqPut(tweet,priority = prioritise(tweet))
+                    wordqPut(tweet,priority = 30)
                 elif tweet['retries'] < 5 :
                     tweet['retries'] += 1
-                    wordqPut(tweet,priority = prioritise(tweet))
+                    wordqPut(tweet,priority = 30)
         else :
             print("Dummy run, not tweeting")
     #flashWord(theWord,10)
     cam.image_effect="none"
     wordq.task_done()
-    
+    glitchLevel=oldGlitchLevel
+    glitchType=oldGlitchType
     if blanked : blankTubes()
 
+    
+def setGlitch(tweet) :
+    #sets glitching according to #glitchlevel:[0-100] and #glitchtype:[swap,shuffle]
+    global glitchLevel
+    global glitchType
+    glitchLevel = 0
+    glitchType = "none"
+    print("setting gitch")
+    level = re.compile(r'glitchlevel:(?:100|[0]?[0-9]?[0-9])$')
+    typ = re.compile(r'glitchtype:swap|shuffle$')
+    for tx in tweet['entities']['hashtags'] :
+        t=tx['text'].lower()
+        if level.match(t) :
+            try :
+                gl = int(split(t,":")[1])
+                print("glitch level req to ", gl)
+                glitchLevel = gl
+            except :
+                print("glitchlevel setting exception text = ", t, "split = ", gl)
+                pass
+        if typ.match(t) :
+            try :
+                gt = split(t,":")[1]
+                print("glitch type req to ", gt)
+                glitchType = gt
+            except :
+                print("glitchtype setting exception text = ", t, "split = ", gt)
+                pass
+                
+    if glitchType !="none" and glitchLevel == 0 :
+        glitchLevel = 50
+    elif glitchLevel >= 0 and glitchType =="none" :
+        glitchType = "swap"
+        
 def rollDice() :
     global makeMovie
     lightTubes()
@@ -449,7 +510,9 @@ def updateQlength() : #sets the description parameter in twitter profile so that
     while len(desc) > 159 :
         baseDesc= "I'm a twitterised, neon display, clock. Tweet with #NixieBotShowMe and a word, full guide on tumblr. "
         hints = ["","100 character limit on movies.", "Try #twitNice .", "Phrases:need:separators.", "No need to @ mention me.", "Twitter will munge URLs.", "Ask an #eightBall question.", "Be patient with long queues.", "Remember, tweets are not anonymous!","Try #twitSwears.","Try #oblique.", "Use #scroll on short words for a gif"]
+        names = ["Neon Clock Tweet Bot", "Nixie McBotFace","Your Words In Neon","Neon Clock Tweet Bot","Neon Clock Tweet Bot"]
         desc = baseDesc+random.choice(hints)
+        nom = random.choice(names)
         if qLen > 0 :
             desc = desc + " Queue at: "+ str(wordq.qsize()) + " to go."
             qAtZero = False
@@ -457,11 +520,60 @@ def updateQlength() : #sets the description parameter in twitter profile so that
             desc = desc + " Queue : Empty"
             qAtZero = True
     try:
-        print("Updating profile :",desc)
-        twitter.update_profile(description = desc)
+        print(">>>>>>>>>>>>> Updating profile ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
+        twitter.update_profile(description = desc, name=nom)
+        print(">>>>>>>>>>>>> Done",  datetime.datetime.now().strftime('%H:%M:%S.%f'))
     except:
         print("status update exception!")
-        
+ 
+def doDMs() :
+    global botState  #we have to keep track of replied to DMs ourselves
+    DMReply = ''' I'm sorry but this bot does not take display commands from direct messages since there should always be a publicly visible origin of anything that is displayed.
+    To get a message displayed you need to tweet with the hashtag #NixieBotShowMe and it will display the word immediatley after that hashtag.
+    For further info see http://nixiebot.tumblr.com/FAQ and http://nixiebot.tumblr.com/ref 
+    This is an automated message sent in reply to all DMs.'''
+    newOnes = False
+    if time.time() - botState['lastDMCheckTime'] > 120 : #check dms every couple of minutes
+        botState['lastDMCheckTime']=time.time()
+        lastDM = botState['lastDM']
+        lastDMHere = lastDM
+        try :
+            dms = twitter.get_direct_messages(since_id=lastDM)
+        except BaseException as e:
+            print("DM fetch exception ", str(e))
+        for dm in dms : #gather new messages
+            if dm['id'] > lastDM :
+                newOnes = True
+                print("new DM! ", dm['id'])
+                botState['DMdq'].appendleft({'ID':dm['sender']['id_str'],'tries':0})
+                if dm['id'] > lastDMHere :
+                    lastDMHere = dm['id']
+        botState['lastDM']=lastDMHere
+        #now send any that are waiting:
+        quota = 1
+        while len(botState['DMdq']) > 0 and quota >=1 :
+            try:
+                rep = botState['DMdq'].pop()
+                response = twitter.send_direct_message(user_id = rep['ID'], text=DMReply)
+                rlr = twitter.get_lastfunction_header('X-Rate-Limit-Remaining')
+                rlrst = twitter.get_lastfunction_header('X-Rate-Limit-Reset')
+               # print("DM rate limit remaining = ", rlr )
+               # print("DM rate limit reset = ", rlrst ) 
+                if rlr is not None and rlrst is not None :                
+                    quota = rlr - int((rlrst - time.time()) / 60) #number of calls available this interval minus the number of minutes left 
+                    print("DM quota = ", quota)
+                else :
+                    quota = quota - 1
+            except BaseException as e:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DM sending exception!" + str(e))
+                rep['tries'] += 1
+                quota = quota - 1
+                if rep['tries'] < 20 :
+                    botState['DMdq'].appendleft(rep)
+                else :
+                    print("!!!!!******   dropping DM due to too many retries at reply", rep)
+        if newOnes :
+            pickleMe(botState,'stateStash',dateStamp=False)            
         
 def displayTime() :
     global tubes
@@ -495,13 +607,16 @@ def tweetMovie(fileName, tweet, tag) :
         for m in tweet['entities']['user_mentions'] :
                 userID=m['id_str']
                 addOwners = addOwners + "," + userID
-        print("tweeting movie, additional owners = ", addOwners)        
+        #print("tweeting movie, additional owners = ", addOwners)        
         
         try:
-            response = twitter.upload_media(media=pic, additional_owners=addOwners, possibly_sensitive = sensitive )  
+            print(">>>>>>>>>>>>> Uploading Movie ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
+            response = twitter.upload_media(media=pic, additional_owners=addOwners, possibly_sensitive = sensitive )
+            print(">>>>>>>>>>>>> Updating status ", datetime.datetime.now().strftime('%H:%M:%S.%f'))  
             twitter.update_status( status=picStatus, 
                  media_ids=[response['media_id']], 
                  in_reply_to_status_id=tweet['id_str'])
+            print(">>>>>>>>>>>>> Done  ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
         except BaseException as e:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Tweeting movie exception!" + str(e))
             print(" status text =", picStatus)
@@ -519,8 +634,8 @@ def displayWords(words, sortem = False, popularity = False, uniq = False, doAuto
     global makeMovie
     global cam
     if makeMovie : 
-        lockCamExposure(cam)
         setEffex(0,0)
+        lockCamExposure(cam)
         if len(words['wordList']) > 100 :
             words['wordList'] = words['wordList'][:frameLimit]
     if sortem :
@@ -561,7 +676,7 @@ def makeGif(name,delay=20) :
     print("making Movie!")
     # mresult = call(["convert","-delay","20","-loop", "0", "tweetMov*.jpg",name+".gif"]) #imagemagick version
     mresult = call(["gm","convert","-delay",str(delay),"-loop", "0", "tweetMov*.jpg",name+".gif"]) #graphicsMagick version
-    print(mresult)
+    print("Make movie command result code = ",mresult)
     for killit in glob("tweetMov*.jpg") :
         if not dummyRun : 
             os.remove(killit) #get rid of the frame files now they're wrapped up
@@ -588,14 +703,24 @@ def takeFrame(resize = True) :
 
     
 def lockCamExposure(camra) :
+    global makeMovie
+    camra.exposure_mode='auto'
+    camra.awb_mode = 'auto'
+    camra.iso = 0
+    makeMovie=False
+    displayString("8"*tubes)
+    time.sleep(3)
+    camra.capture('exposure.jpg')
     #assumes camera is already open and gains have settled
     camra.shutter_speed = camra.exposure_speed
     camra.exposure_mode = 'off'
     g = camra.awb_gains
     camra.awb_mode = 'off'
     camra.awb_gains = g
-    camra.iso = 800
-    
+    #camra.iso = 800
+    displayString(" "*tubes)
+    makeMovie=True
+
 def unlockCamExposure(camra) :
     camra.exposure_mode='auto'
     camra.awb_mode = 'auto'
@@ -610,7 +735,7 @@ def setCamEffex(camra,tweet) :
 def makeStatusText(tweet,aWord):
     salutes=("Your wish is my command","Thanks for the suggestion","Hello","Hi",
              "Wotcha","Greetings","Thanks","","","","Thanks for the tweet","Eh-up","Wotcher",
-             "So,","Hello","Hi","Good%DAYTIME%","Salutations","Ahoy there")   
+             "So,","Hello","Hi","Good%DAYTIME%","Salutations","Ahoy there", "Well,", "OK,", "Ummm,", "'Sup", "Ah, there you are" )   
     scolds = (". How very original,", ". How old are you? I'm guessing 13,", ". 'Edgy' is dank now, didn't you know? Anyway," , ". Would your mother let you say that? Anyway,",
                ". Really? OK,"     )             
     picStatus = random.choice(salutes) + " @" + tweet['user']['screen_name']
@@ -645,6 +770,8 @@ def makeStatusText(tweet,aWord):
     else :
         picStatus = picStatus + " here's your pic. "
     
+    if scanTags(tweet, "HMHB") :
+       picStatus = picStatus + "#HMHB"  
     tailIt = False    
     if len(tweet['entities']['user_mentions'])> 0:
         #print("############ processing mentions ")
@@ -675,6 +802,7 @@ def processIncomingTweet(tweet): #check tweet that has come in via the filter st
     # print(tweet)
     global maxWordQ
     global wordq
+    global randstream
     if scanTags(tweet,"NixieBotShowMe") :
         theWord=extractWord(html.parser.HTMLParser().unescape(tweet['text']))
         if ((theWord is not None ) or ( hasCommand(tweet))) :
@@ -690,6 +818,9 @@ def processIncomingTweet(tweet): #check tweet that has come in via the filter st
     elif scanTags(tweet,"NixieBotRollMe") :
         rollq.put(tweet)
         print("roll request incoming! Word queue at:", rollq.qsize())
+    else :
+        #must be a trump tweet so submit to random for now
+        randstream.on_success(tweet)
     
     # DMreceipt bad idea as it still counts against rate limit
     #for ht in tweet['entities']['hashtags']:        
@@ -702,19 +833,26 @@ def prioritise(tweet) :
     # future use: deprioritise abusive users?
     if tweet['user']['screen_name'] in priorityUsers :
         return(1)
+    elif scanTags(tweet,"HMHB"):
+         return(40)
     else :
         return(50)
 
 def pickleMe(item, baseName, dateStamp = True) :  #pickle item out to a file named
-    fileName = baseName + "-" + time.strftime("%Y%m%d-%H%M%S")+ ".pkl"
+    fileName = baseName
+    if dateStamp :
+        fileName = fileName + "-" + time.strftime("%Y%m%d-%H%M%S")
+    fileName = fileName + ".pkl"    
     print("Trying to pickle out " + fileName )
-    try :
-        pickle.dump(item,open( fileName, "wb" ))
-        return (True)
-    except : 
-        print("exception pickling! better check disc space ")
-        return(False)
-        
+    fh = open( fileName, "wb" )
+    with fh :
+        try :
+            pickle.dump(item,fh)
+            return (True)
+        except : 
+            print("exception pickling! better check disc space ")
+            return(False)
+            
 def sendReceipt(tweet,theWord,tt):
     global wordq
     global twitter
@@ -833,9 +971,38 @@ def proper(strng,subst):
     return(newstring)
 
 
+def glitchIt(strng) :
+    global glitchLevel
+    global glitchType
+    slist = list(strng)
+    if glitchLevel == 0 :
+        return(strng)
+    if glitchType.lower() == "swap" :  
+        for i in range(0,len(slist)-1) :
+            if random.randint(0,100) <=  glitchLevel :
+                if userFont :
+                    slist[i] = random.choice(userProperChars)
+                else :
+                    slist[i] = random.choice("@1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ ")                      
+    elif glitchType.lower() == "shuffle" :
+        if random.randint(0,100) <= glitchLevel :
+            if len(slist) >= 4  :
+                startCh = random.randint(0,len(slist)-4)
+                endCh = random.randint(startCh,len(slist)-2)
+                print("shuffling ", startCh, endCh)
+                try :
+                    random.shuffle(slist[startCh:endCh])
+                except  :
+                    slist = list(strng) #slice failed due to too short a string and bad random choice, so just reset   
+            #random.shuffle(slist)
+    strng="".join(slist)         
+    return(strng)        
+            
+    
 def displayString(strng, resize = True):
     global comLock
     #print("displaystring wait comlock")
+    strng=glitchIt(strng)
     with comLock :
      #   print("displaystring  got comlock")
         if log_level > 5 :
@@ -846,7 +1013,7 @@ def displayString(strng, resize = True):
     #print("displaystring rel comlock")        
     return
 
-def scrollString(strng, offset = 0, resize = True):
+def scrollString(strng, offset = tubes-2, resize = True):
     global tubes
     global scrollInterval
     stashfx = effx
@@ -860,7 +1027,7 @@ def scrollString(strng, offset = 0, resize = True):
         #print((" " * startTube) + ( strng[0:tubes-startTube].ljust(tubes) ))
         if not makeMovie : time.sleep(scrollInterval)    
     #then scroll out off the left    
-    for startChar in range(0,len(strng)):
+    for startChar in range(0,len(strng)-(tubes - 4)):
         displayString(strng[startChar:startChar+tubes].ljust(tubes), resize = resize)
         #print(strng[startChar:startChar+tubes].ljust(tubes))
         if not makeMovie: time.sleep(scrollInterval)
@@ -950,7 +1117,7 @@ def readStream():
     print("Starting filter stream reader")
     while running:
         try:
-           instream.statuses.filter(track="#NixieBotShowMe,#NixieBotRollMe")
+           instream.statuses.filter(track="#NixieBotShowMe")
         except BaseException as e:
            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!exception in readstream!") 
            print(e)
@@ -1122,34 +1289,52 @@ def cameraSettings() :
 loadTextFortunes()  #read in *.ftnline by line and put into list in fortunes{} directory    
 running=True
 # retrieve saved queue if file is present here, remember to delete file after!
+print("retrieving state")
 try:
     with open('tweetstash.pkl','rb') as f:
         stashlist=[]
-        print("found stash file,unpickling")
+        print("found stash file, unpickling")
         stashlist=pickle.load(f)
         print("found " + str(len(stashlist)) + " tweets, now enqueuing") 
         for tweet in stashlist :
             #wordqPut(tweet,priority = 50)  #one time hack for old pickle
-            wordqPut(tweet[2], priority=tweet[0])
+            if scanTags(tweet[2],"HMHB") :
+               wordqPut(tweet[2],priority=40)
+            else :
+               wordqPut(tweet[2], priority=tweet[0])
         print(" all enqueued, size = " + str(wordq.qsize()))
         f.close()
         os.remove('tweetstash.pkl')
 except IOError as e:
     print ("Unable to open stash file, starting queue anew" )#Does not exist OR no read permissions
+
+try:
+    with open('stateStash.pkl','rb') as f:
+        print("found state file, unpickling")
+        botState=pickle.load(f)
+        f.close()
+except IOError as e:
+    print ("Unable to open state file, using defaults" )#Does not exist OR no read permissions    
+    
+    
 # load up ussr characterset uf there is i=one (actual font is stored on eeprom in contrllers, this file is written when font are loaded)    
 
         
-print("setting up streams")
-randstream=randomStreamer(botkeys.APP_KEY,botkeys.APP_SECRET,botkeys.USER_KEY,botkeys.USER_SECRET)
+print("setting up filter stream")
 instream=filterStreamer(botkeys.APP_KEY,botkeys.APP_SECRET,botkeys.USER_KEY,botkeys.USER_SECRET)
-
-print("starting threads")
-c=threading.Thread(target=runClock)
-c.start()
-r=threading.Thread(target=enqueueRandoms)
-r.start()
 s=threading.Thread(target=readStream)
 s.start()
+time.sleep(15) #
+print("setting up random sample stream")
+randstream=randomStreamer(botkeys.APP_KEY,botkeys.APP_SECRET,botkeys.USER_KEY,botkeys.USER_SECRET)
+r=threading.Thread(target=enqueueRandoms)
+r.start()
+
+print("starting clock thread")
+c=threading.Thread(target=runClock)
+c.start()
+
+
 try:
     while running:
         key = input("Enter log level(0-4) q to quit nicely or H for help ")
@@ -1171,6 +1356,7 @@ try:
             print("I to inject a test tweet for immediate display")
             print("G to Go take a picture of a supplied string ... not tweeted, high resolution used. ")
             print("E to enter Exposure test mode (for capturing and setting camera parameters")
+            print("L to set display gLitch paramters ")
             print("Q to quit nicely, disconnecting twitter streams behind you (if rate limit sleep is in progress it is not interrupted)")
             print("H to display this message")
             
@@ -1232,6 +1418,10 @@ try:
             picNoTweet(picWord)
         if key.upper() =="E" :
             cameraSettings()
+        if key.upper() == "L" :
+            glitchType = input("choose a glitch type ( swap, shuffle ) ")
+            glitchLevel = int(input("choose a glitch level from 0 (no effect) to 100 (all letters affected)"))
+            print("Glitch Level = ", glitchLevel, " Glitch type = ", glitchType)
         if key == "Q" or key == "q" :
             running = False
             print("joining runclock until it terminates")
@@ -1239,11 +1429,7 @@ try:
             instream.disconnect() 
             randstream.disconnect() 
             GPIO.cleanup() 
-            print("terminating streams")               
-            print("joining s")
-            s.join()
-            print("joining r")
-            r.join()
+            pickleMe(botState,"stateStash",dateStamp=False)
             if wordq.qsize() >0 :
                 #save wordqueue if there's anything in it
                 print("pickling the queue, size = " +str(wordq.qsize()) + " tweets")
@@ -1254,9 +1440,17 @@ try:
                 while wordq.qsize() >0 :
                     tweet = wordq.get()
                     stash.append(tweet)
-                pickle.dump( stash, open( "tweetstash.pkl", "wb" ) ) 
+                fh = open("tweetstash.pkl", "wb" )    
+                pickle.dump( stash, fh ) 
+                fh.close()
                 print("pickled ok! now joining remaining threads") 
             pickleMe(recentReqs, "Requests", dateStamp=True)
+            print("terminating streams")               
+            print("joining s")
+            s.join()
+            print("joining r")
+            r.join()
+            
             print("all done, bye bye")
 except BaseException as e:
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!exception in main loop")
