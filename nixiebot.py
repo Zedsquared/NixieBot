@@ -559,6 +559,7 @@ def doDMs() :
                 rlrst = twitter.get_lastfunction_header('X-Rate-Limit-Reset')
                # print("DM rate limit remaining = ", rlr )
                # print("DM rate limit reset = ", rlrst ) 
+               # currently just getting None replies on the above calls... find out why!
                 if rlr is not None and rlrst is not None :                
                     quota = rlr - int((rlrst - time.time()) / 60) #number of calls available this interval minus the number of minutes left 
                     print("DM quota = ", quota)
