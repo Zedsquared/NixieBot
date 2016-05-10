@@ -454,13 +454,13 @@ def setGlitch(tweet) :
     glitchLevel = 0
     glitchType = "none"
     print("setting gitch")
-    level = re.compile(r'glitchlevel:(?:100|[0]?[0-9]?[0-9])$')
-    typ = re.compile(r'glitchtype:swap|shuffle$')
+    level = re.compile(r'glitchlevel(?:100|[0]?[0-9]?[0-9])$')
+    typ = re.compile(r'glitchtype(swap|shuffle)$')
     for tx in tweet['entities']['hashtags'] :
         t=tx['text'].lower()
         if level.match(t) :
             try :
-                gl = int(split(t,":")[1])
+                gl = int(t.split("glitchlevel")[1])
                 print("glitch level req to ", gl)
                 glitchLevel = gl
             except :
@@ -468,7 +468,7 @@ def setGlitch(tweet) :
                 pass
         if typ.match(t) :
             try :
-                gt = split(t,":")[1]
+                gt = t.split("glitchtype")[1]
                 print("glitch type req to ", gt)
                 glitchType = gt
             except :
@@ -564,7 +564,7 @@ def doDMs() :
                     quota = rlr - int((rlrst - time.time()) / 60) #number of calls available this interval minus the number of minutes left 
                     print("DM quota = ", quota)
                 else :
-                    quota = quota - 1
+                    quota = quota - 1  #default to one per minute safe rate
             except BaseException as e:
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DM sending exception!" + str(e))
                 rep['tries'] += 1
@@ -572,7 +572,7 @@ def doDMs() :
                 if rep['tries'] < 20 :
                     botState['DMdq'].appendleft(rep)
                 else :
-                    print("!!!!!******   dropping DM due to too many retries at reply", rep)
+                    print("!!!!!******   dropping DM due to too many retries at reply: ", rep)
         if newOnes :
             pickleMe(botState,'stateStash',dateStamp=False)            
         
