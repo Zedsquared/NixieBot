@@ -14,9 +14,11 @@ latest = latest + oldest
 geoLocTotal = 0
 tweetsTotal = 0
 placedTotal = 0
+langTotal = 0
 locatedUsers=0
 userctr = collections.Counter()
 countryctr = collections.Counter()
+langctr = collections.Counter()
 for f in files[oldest:latest] :
     #print("processing file", f)
     with open(f,'rb') as pkl :
@@ -35,6 +37,10 @@ for f in files[oldest:latest] :
                     placedTotal += 1
                     print( tweet['place']['country'])
                     countryctr.update({tweet['place']['country_code']:1})
+                if 'lang' in tweet and tweet['lang'] is not None :
+                    langTotal += 1
+                    print( tweet['lang']['country'])
+                    langctr.update({tweet['lang']:1})    
                 if 'user' in tweet :
                     userctr.update({tweet['user']['id_str']:1})
                     if 'location' in tweet['user'] and tweet['user']['location'] is not None :
@@ -44,7 +50,10 @@ for f in files[oldest:latest] :
 print("Total tweets: ", tweetsTotal)
 print("Total geolocated tweets ", geoLocTotal)
 print("Total placed tweets ", placedTotal)
-print("Total unique users", len(userctr)) 
+print("Total tweets with language set", langTotal)
+print("top ten languages: ", lanctr.most_common(10))
+print("number of languages used:", len(langctr))
+print("Total unique users: ", len(userctr)) 
 print ("top ten users : ", userctr.most_common(10))
 print("Total located users = ", locatedUsers)
 print ("Total countries reached", len(countryctr))

@@ -48,6 +48,7 @@ from subprocess import call
 from glob import glob
 from functools import partial
 import os
+from shutil import copyfile, move
 import re
 import html.parser
 import botkeys   #API keys are stored in botkeys.py ... edit it with your keys
@@ -80,6 +81,7 @@ profileUpdateCounter = 0
 onlyOriginalRandoms=True
 displayTwOI=True
 timeInterval=15
+timeLapseInterval=15 #minutes per frame for daily time lapse
 dtctr=0
 dtCycles = 3
 blankpin = 12  #we use GPIO in BOARD mode so this is a P1 pin number not the broadcom GPIO number
@@ -89,11 +91,14 @@ userProperChars = ""
 cam=None
 glitchType = "none"
 glitchLevel = 0
-
-botState={'lastDM':0,'lastDMCheckTime':time.time(),'DMdq':collections.deque()}
+dailyMovieCounter = 0
+lapseDone = False
+basePath="/home/pi/nixiebot/"
+botState={'lastDM':0,'lastDMCheckTime':time.time(),'DMdq':collections.deque(),'maxWordQ':0}
 
 badwords=["4r5e", "5h1t", "5hit", "a55", "anal", "anus", "ar5e", "arrse", "arse", "ass", "ass-fucker", "asses", "assfucker", "assfukka", "asshole", "assholes", "asswhole", "a_s_s", "b!tch", "b00bs", "b17ch", "b1tch", "ballbag", "balls", "ballsack", "bastard", "beastial", "beastiality", "bellend", "bestial", "bestiality", "bi+ch", "biatch", "bitch", "bitcher", "bitchers", "bitches", "bitchin", "bitching", "bloody", "blow job", "blowjob", "blowjobs", "boiolas", "bollock", "bollok", "boner", "boob", "boobs", "booobs", "boooobs", "booooobs", "booooooobs", "breasts", "buceta", "bugger", "bum", "bunny fucker", "butt", "butthole", "buttmuch", "buttplug", "c0ck", "c0cksucker", "carpet muncher", "cawk", "chink", "cipa", "cl1t", "clit", "clitoris", "clits", "cnut", "cock", "cock-sucker", "cockface", "cockhead", "cockmunch", "cockmuncher", "cocks", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocksucks", "cocksuka", "cocksukka", "cok", "cokmuncher", "coksucka", "coon", "cox", "crap", "cum", "cummer", "cumming", "cums", "cumshot", "cunilingus", "cunillingus", "cunnilingus", "cunt", "cuntlick", "cuntlicker", "cuntlicking", "cunts", "cyalis", "cyberfuc", "cyberfuck", "cyberfucked", "cyberfucker", "cyberfuckers", "cyberfucking", "d1ck", "damn", "dick", "dickhead", "dildo", "dildos", "dink", "dinks", "dirsa", "dlck", "dog-fucker", "doggin", "dogging", "donkeyribber", "doosh", "duche", "dyke", "ejaculate", "ejaculated", "ejaculates", "ejaculating", "ejaculatings", "ejaculation", "ejakulate", "f u c k", "f u c k e r", "f4nny", "fag", "fagging", "faggitt", "faggot", "faggs", "fagot", "fagots", "fags", "fanny", "fannyflaps", "fannyfucker", "fanyy", "fatass", "fcuk", "fcuker", "fcuking", "feck", "fecker", "felching", "fellate", "fellatio", "fingerfuck", "fingerfucked", "fingerfucker", "fingerfuckers", "fingerfucking", "fingerfucks", "fistfuck", "fistfucked", "fistfucker", "fistfuckers", "fistfucking", "fistfuckings", "fistfucks", "flange", "fook", "fooker", "fuck", "fucka", "fucked", "fucker", "fuckers", "fuckhead", "fuckheads", "fuckin", "fucking", "fuckings", "fuckingshitmotherfucker", "fuckme", "fucks", "fuckwhit", "fuckwit", "fudge packer", "fudgepacker", "fuk", "fuker", "fukker", "fukkin", "fuks", "fukwhit", "fukwit", "fux", "fux0r", "f_u_c_k", "gangbang", "gangbanged", "gangbangs", "gaylord", "gaysex", "goatse", "god-dam", "god-damned", "goddamn", "goddamned", "hardcoresex", "hell", "heshe", "hoar", "hoare", "hoer", "homo", "hore", "horniest", "horny", "hotsex", "jack-off", "jackoff", "jap", "jerk-off", "jism", "jiz", "jizm", "jizz", "kawk", "knob", "knobead", "knobed", "knobend", "knobhead", "knobjocky", "knobjokey", "kock", "kondum", "kondums", "kum", "kummer", "kumming", "kums", "kunilingus", "l3i+ch", "l3itch", "labia", "lmfao", "lust", "lusting", "m0f0", "m0fo", "m45terbate", "ma5terb8", "ma5terbate", "masochist", "master-bate", "masterb8", "masterbat*", "masterbat3", "masterbate", "masterbation", "masterbations", "masturbate", "mo-fo", "mof0", "mofo", "mothafuck", "mothafucka", "mothafuckas", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckers", "mothafuckin", "mothafucking", "mothafuckings", "mothafucks", "mother fucker", "motherfuck", "motherfucked", "motherfucker", "motherfuckers", "motherfuckin", "motherfucking", "motherfuckings", "motherfuckka", "motherfucks", "muff", "mutha", "muthafecker", "muthafuckker", "muther", "mutherfucker", "n1gger", "nazi", "nigg3r","nigger", "niggers", "nob", "nob jokey", "nobhead", "nobjocky", "nobjokey", "numbnuts", "nutsack", "orgasim", "orgasims", "orgasm", "orgasms", "p0rn", "pawn", "pecker", "penis", "penisfucker", "phonesex", "phuck", "phuk", "phuked", "phuking", "phukked", "phukking", "phuks", "phuq", "pigfucker", "pimpis", "piss", "pissed", "pisser", "pissers", "pisses", "pissflaps", "pissin", "pissing", "pissoff", "poop", "porn", "porno", "pornography", "pornos", "prick", "pricks", "pron", "pube", "pusse", "pussi", "pussies", "pussy", "pussys", "rectum", "retard", "rimjaw", "rimming", "s hit", "s.o.b.", "sadist", "schlong", "screwing", "scroat", "scrote", "scrotum", "semen", "sex", "sh!+", "sh!t", "sh1t", "shag", "shagger", "shaggin", "shagging", "shemale", "shi+", "shit", "shitdick", "shite", "shited", "shitey", "shitfuck", "shitfull", "shithead", "shiting", "shitings", "shits", "shitted", "shitter", "shitters", "shitting", "shittings", "shitty", "skank", "slut", "sluts", "smegma", "smut", "snatch", "son-of-a-bitch", "spac", "spunk", "s_h_i_t", "t1tt1e5", "t1tties", "teets", "teez", "testical", "testicle", "tit", "titfuck", "tits", "titt", "tittie5", "tittiefucker", "titties", "tittyfuck", "tittywank", "titwank", "tosser", "turd", "tw4t", "twat", "twathead", "twatty", "twunt", "twunter", "v14gra", "v1gra", "vagina", "viagra", "vulva", "w00se", "wang", "wank", "wanker", "wanky", "whoar", "whore", "willies", "willy", "xrated", "xxx"]
 nicewords=["love","luv","excellent","happy","joy","joyous","fantastic","superb","great","wonderful","nice","respect","respectful","anticipating","lovely","friendly","friend","best","cheers","thanks","glad","satisfied","satisfying","splendid","kind","welcome","welcoming","charming","delicious","pleasant","polite","tender","affable","sympathy","empathy","empathetic","sympathetic","peaceful","fond","good","cake","pie","kitten","kittens","swell","grand","peace","unity","amity","justice","truce","esteem"]
+boringWords=["this","that","with","from","have","what","your","like","when","just"]
 validTags=["twitnice","twitswears","twitall","thetime"] #list of tags that can substitute for an actual word
 #validTags=[] #temporary measure
 client_args = {'timeout': 90 }
@@ -109,12 +114,11 @@ priorityUsers=["Zedsquared", "NixtestTest"]  #tweets from these users get high p
 #                    }
                     
 userCounter = collections.Counter()
-minInterval=46  #seconds per tweet minimum (2400 per day allowed)
+minInterval=40  #seconds per tweet minimum (2400 per day allowed)
 frameLimit = 100
 wordq = queue.PriorityQueue() #Stores incoming command tweets, priority allows quicker live testing
 randq=queue.Queue(100) #just a little buffer 
 consoleQ =  queue.Queue()  # for direct injection messages
-maxWordQ = 0 
 wordQIdx = 0 #usd to keep wordq items sortable
 rollq = queue.Queue()
 recentTweetDeque = collections.deque('a',1000)  #random feed seems to be about five a second
@@ -288,6 +292,7 @@ def runClock():  #TODO ... use queue get with timeout and try catch as I think i
     global timeThen
     global profileUpdateCounter
     global clockPause
+    global lapseDone
     print("**************clock thread starting ")
     print("GPIO init")
     initGPIO()
@@ -310,8 +315,13 @@ def runClock():  #TODO ... use queue get with timeout and try catch as I think i
                         updateQlength()
                         profileUpdateCounter = 0;
                 if not rollq.empty() :
-                    rollDice()
+                    rollDice()         
             t=datetime.datetime.now()
+            if  int(t.minute) % timeLapseInterval == 0 :
+                doTimeLapse()  #either choose a frame from recent first frames or, if none available, take one from random stats
+                               #if it's the appointed hour, generate and tweet the time lapse movie. 
+            else : 
+                lapseDone = False 
             if  int(t.second) // timeInterval != lastdecade :
                 lastdecade = int(t.second) // timeInterval
                 dtctr += 1
@@ -400,9 +410,9 @@ def tweetOutWord() : #main function for processing a tweet that has a command in
     if not tt: #tt flag gets set if any action other than "display a word that has been submitted "  has happened already
         theWord=extractWord(html.parser.HTMLParser().unescape(tweet['text']))
         picStatus=makeStatusText(tweet, theWord) 
+        lockCamExposure(cam)
         if len(theWord) > tubes or scanTags(tweet,"scroll"):
             print("movie")
-            lockCamExposure(cam)
             makeMovie = True
             scrollString(proper(theWord," "))
             makeGif("tweetWord")
@@ -414,6 +424,7 @@ def tweetOutWord() : #main function for processing a tweet that has a command in
             time.sleep(1.5)
             cam.capture('tweet.jpg',resize=(800,480))
             mediaName = 'tweet.jpg'
+        unlockCamExposure(cam)    
         pic=open(mediaName,'rb')
         addOwners=str(tweet['user']['id'])
         for m in tweet['entities']['user_mentions'] : #add all mentions as media owners so they can pass it on
@@ -453,7 +464,7 @@ def setGlitch(tweet) :
     global glitchType
     glitchLevel = 0
     glitchType = "none"
-    print("setting gitch")
+    print("setting glitch")
     level = re.compile(r'glitchlevel(?:100|[0]?[0-9]?[0-9])$')
     typ = re.compile(r'glitchtype(swap|shuffle)$')
     for tx in tweet['entities']['hashtags'] :
@@ -538,9 +549,11 @@ def doDMs() :
         lastDM = botState['lastDM']
         lastDMHere = lastDM
         try :
+            #print("Checking DMs")
             dms = twitter.get_direct_messages(since_id=lastDM)
         except BaseException as e:
             print("DM fetch exception ", str(e))
+            return
         for dm in dms : #gather new messages
             if dm['id'] > lastDM :
                 newOnes = True
@@ -686,7 +699,7 @@ def makeGif(name,delay=20) :
 def takeFrame(resize = True) :
     global cam
     global frameCount
-    if frameCount < 10 :
+    if frameCount < 10 : #add apropriate leading zeroes to make alpahabetic sort of file names work.
         frameStr = "00"+ str(frameCount)
     elif  frameCount < 100 :
         frameStr  = "0" + str(frameCount)
@@ -696,18 +709,107 @@ def takeFrame(resize = True) :
         print("capturing frame:", frameCount)
     if frameCount <= frameLimit and resize:    
         cam.capture('tweetMov'+frameStr+'.jpg',resize=(320,200))
+        if frameCount == 0 :
+            lapseStash('tweetMov'+frameStr+'.jpg')  #save a copy of first frame for use in making daily time lapse movie
         frameCount += 1
     elif not resize :
         cam.capture('tweetMov'+frameStr+'.jpg')
         frameCount += 1
     else : print("hit frame limit")
-
     
+
+def lapseStash(fileName) :
+    #copy under a different name so it can be used as a candidate for time lapse movie frame
+    newName = "lapse-" + time.strftime("%Y%m%d-%H%M%S")+".jpg"
+    try :
+       copyfile(fileName,newName)
+    except :
+        print("Error in lapseStash", e)
+
+def doTimeLapse() :
+    global cam
+    global lapseDone
+    global makeMovie
+    global effx
+    global effxspeed
+    if lapseDone :
+        return
+    print("doTimeLapse called")    
+    #delete all lapse*.jpg older than (lapseTime / 2)
+    #pick youngest lapse*.jpg file and copy to lapseFrames directory    youngestName = ""
+    youngestTime = time.time()
+    youngestFile= ""
+    timeLimit = time.time() - ((timeLapseInterval/2) * 60)
+    files = glob(basePath+"lapse*.jpg")
+    for f in  files :
+        fileTime = os.path.getatime(f)
+        if fileTime < timeLimit :
+            print("deleting ", f, " age =", (time.time() - fileTime)/60)
+            os.remove(f)
+        elif fileTime < youngestTime :
+            youngtestTime = fileTime
+            youngestFile = f
+    if youngestFile != "" :
+        print("moving file", youngestFile , "into frame store")
+        move(youngestFile, basePath+"lapseFrames/")
+    else :
+        #take frame of most popular word in random tweet sample of four or more letters
+        words=randstream.allWords()['wordList']
+        bigEnough=[]
+        for w in words :
+            if len(w) >= 4 and w not in boringWords and "&" not in w:
+                bigEnough.append(w)
+        c = collections.Counter(bigEnough)
+        topWords=c.most_common(20)
+        theWord=topWords[0][0]
+        print(topWords, theWord)        
+        makeMovie = False
+        stashfx = effx
+        stashspeed = fxspeed
+        setEffex(0,0)
+        lockCamExposure(cam)
+        displayString(theWord)
+        cam.capture(basePath+"/lapseFrames/lapse-"+time.strftime("%Y%m%d-%H%M%S")+".jpg",resize=(320,200))
+        unlockCamExposure(cam)
+        setEffex(stashfx,stashspeed)
+        
+    lapseFrames = glob(basePath+"lapseFrames/*.jpg")
+    #if there are now 96 files in the frames folder, make a movie and tweet it out #NixieLapse
+    print(len(lapseFrames),"lapse frames found")
+    if len(lapseFrames) >=96 :
+        print("making daily time lapse")
+        delay=20
+        mresult = call(["gm","convert","-delay",str(delay),"-loop", "0", basePath+"/lapseFrames/*.jpg","Tlapse.gif"]) 
+        print("Make movie command result code = ",mresult)
+        if mresult == 0 :
+            uploadRetries = 0
+            while uploadRetries < 3 : 
+                try:
+                    pic =open("Tlapse.gif","rb")
+                    print(">>>>>>>>>>>>> Uploading Timelapse Movie ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
+                    response = twitter.upload_media(media=pic )
+                    print(">>>>>>>>>>>>> Updating status ", datetime.datetime.now().strftime('%H:%M:%S.%f'))  
+                    twitter.update_status( status="This is how my day went: #NixieBotTimelapse", 
+                       media_ids=[response['media_id']] )
+                    print(">>>>>>>>>>>>> Done  ", datetime.datetime.now().strftime('%H:%M:%S.%f'))
+                    uploadRetries = 200
+                except BaseException as e:
+                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Tweeting movie exception!" + str(e))
+                    uploadRetries += 1 
+            move(basePath+"Tlapse.gif", basePath+"lapseFrames/Tlapse"+time.strftime("%Y%m%d-%H%M%S")+ ".gif")        
+        for f in lapseFrames :
+            os.remove(f)
+    lapseDone = True        
+    return()
+    
+
+        
 def lockCamExposure(camra) :
     global makeMovie
     camra.exposure_mode='auto'
     camra.awb_mode = 'auto'
     camra.iso = 0
+    OLDMM = makeMovie
     makeMovie=False
     displayString("8"*tubes)
     time.sleep(3)
@@ -720,7 +822,7 @@ def lockCamExposure(camra) :
     camra.awb_gains = g
     #camra.iso = 800
     displayString(" "*tubes)
-    makeMovie=True
+    makeMovie=OLDMM
 
 def unlockCamExposure(camra) :
     camra.exposure_mode='auto'
@@ -801,7 +903,7 @@ def hasCommand(tweet) :
                     
 def processIncomingTweet(tweet): #check tweet that has come in via the filter stream, it might have commands in it
     # print(tweet)
-    global maxWordQ
+    global botState
     global wordq
     global randstream
     if scanTags(tweet,"NixieBotShowMe") :
@@ -809,8 +911,8 @@ def processIncomingTweet(tweet): #check tweet that has come in via the filter st
         if ((theWord is not None ) or ( hasCommand(tweet))) :
             wordqPut(tweet,priority = prioritise(tweet))
             size = wordq.qsize()
-            if size > maxWordQ : maxWordQ = size
-            print("word request from", tweet['user']['screen_name'], "word = ", theWord, " Word queue at:", size, "maxqueue was ", maxWordQ)
+            if size > botState['maxWordQ'] : botState['maxWordQ'] = size
+            print("word request from", tweet['user']['screen_name'], "word = ", theWord, " Word queue at:", size, "maxqueue was ", botState['maxWordQ'])
             recentReqs.append(tweet) # store for sending to hard storage every now and then
             if len(recentReqs) > reqPickleFrequency :
                 if pickleMe(recentReqs, "Requests", dateStamp=True) :
@@ -849,6 +951,7 @@ def pickleMe(item, baseName, dateStamp = True) :  #pickle item out to a file nam
     with fh :
         try :
             pickle.dump(item,fh)
+            print("OK, done")
             return (True)
         except : 
             print("exception pickling! better check disc space ")
@@ -1252,7 +1355,9 @@ def loadTextFortunes() :
 
 def picNoTweet(txt, name="noTweet") : #take a highest resolution possible pic or movie and don't tweet it out, file to be transported by other means
     global makeMovie
+    global cam
     with comLock : #wait for display to become ready after latest clock loop has finished with it
+        lockCamExposure(cam)
         if len(txt) > tubes:
             makeMovie = True
             scrollString(proper(txt," "), resize=False)
@@ -1262,6 +1367,7 @@ def picNoTweet(txt, name="noTweet") : #take a highest resolution possible pic or
             displayString(proper(txt," ").ljust(tubes))
             time.sleep(1.5)
             cam.capture(name+'.jpg')
+        unlockCamExposure(cam)    
 
 def cameraSettings() :
     global cam
@@ -1313,6 +1419,7 @@ try:
     with open('stateStash.pkl','rb') as f:
         print("found state file, unpickling")
         botState=pickle.load(f)
+        print("botstate = ", botState)
         f.close()
 except IOError as e:
     print ("Unable to open state file, using defaults" )#Does not exist OR no read permissions    
@@ -1366,7 +1473,7 @@ try:
             print("loglevel set to " + key)
         if key =="?" :
             print("word queue length = " + str(wordq.qsize()))
-            print("Maximumword queue was " + str(maxWordQ) )
+            print("Maximumword queue was " + str(botState['maxWordQ']) )
             print("Collected requests buffer length (emptied to disc at ", reqPickleFrequency , ") ", len(recentReqs))
             print("random queue length = " + str(randq.qsize()))
             print("recent random tweet deque length = " + str(len(recentTweetDeque)))
@@ -1445,7 +1552,8 @@ try:
                 pickle.dump( stash, fh ) 
                 fh.close()
                 print("pickled ok! now joining remaining threads") 
-            pickleMe(recentReqs, "Requests", dateStamp=True)
+            if len(recentReqs) > 0 :    
+               pickleMe(recentReqs, "Requests", dateStamp=True)
             print("terminating streams")               
             print("joining s")
             s.join()
